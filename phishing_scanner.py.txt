@@ -1,0 +1,48 @@
+import re
+
+SUSPICIOUS_KEYWORDS = ['login', 'verify', 'update', 'secure', 'account', 'banking', 'paypal', 'signin', 'webscr']
+
+def is_url_valid(url: str) -> bool:
+    regex = re.compile(
+        r'^(https?://)?' 
+        r'(([A-Za-z0-9-]+\.)+[A-Za-z]{2,})'  
+        r'(/[\w\-./?%&=]*)?$'
+    )
+    return re.match(regex, url) is not None
+
+def analyze_url(url: str) -> str:
+    score = 0
+    result = "Safe"
+
+    # Check for suspicious keywords
+    for keyword in SUSPICIOUS_KEYWORDS:
+        if keyword.lower() in url.lower():
+            score += 1
+
+    # Check for IP address
+    if re.search(r'\d+\.\d+\.\d+\.\d+', url):
+        score += 1
+
+    # Check for HTTPS
+    if not url.startswith('https://'):
+        score += 1
+
+    if score >= 3:
+        result = "Phishing (Highly Suspicious)"
+    elif score == 2:
+        result = "Suspicious"
+
+    return result
+
+def main():
+    url = input("Enter the URL to scan: ").strip()
+    
+    if not is_url_valid(url):
+        print("Invalid URL format.")
+        return
+
+    result = analyze_url(url)
+    print(f"Scan Result: {result}")
+
+if __name__ == "__main__":
+    main()
